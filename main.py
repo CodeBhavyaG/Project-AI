@@ -1,6 +1,19 @@
-def main():
-    print("Hello from project-ai!")
-
+from langgraph.graph.message import add_messages
+from langgraph.graph import StateGraph ,START ,END
+from agent.Intent import Intent_Agent
+from agent.test import test_agent
+from state import State
 
 if __name__ == "__main__":
-    main()
+    graph = StateGraph(State)
+    graph.add_node("Intent Agent",Intent_Agent)
+    graph.add_node("Test Agent",test_agent)
+    graph.add_edge(START,"Intent Agent")
+    graph.add_edge("Intent Agent","Test Agent")
+    graph.add_edge("Test Agent",END)
+
+    graph = graph.compile()
+    print(graph.invoke({"query":"build a CRUD app with a deshborad and a working billing system"}))
+    
+
+    

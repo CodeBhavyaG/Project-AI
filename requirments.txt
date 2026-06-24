@@ -1,1 +1,5 @@
 transformers
+langchain
+langgraph
+langchain-groq
+langchain-huggingface
