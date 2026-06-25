@@ -13,7 +13,7 @@ if __name__ == "__main__":
     graph.add_edge("Test Agent",END)
 
     graph = graph.compile()
-    print(graph.invoke({"query":"build a CRUD app with a deshborad and a working billing system"}))
+    graph.invoke({"query":"Make a Pintrest type website"})
     
 
     

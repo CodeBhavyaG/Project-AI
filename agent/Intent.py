@@ -3,20 +3,33 @@ import dotenv
 
 from state import State, Intent
 from langchain.chat_models import init_chat_model
+from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 
 dotenv.load_dotenv()  # Load environment variables from .env file
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
 def Intent_Agent(state : State) :
 
-    model = init_chat_model(
-        model="Qwen/Qwen3-0.6B:featherless-ai",
-        model_provider="openai", # Change from "hugging face" to "openai"
-        base_url="https://router.huggingface.co/v1",
-        api_key=os.getenv("HF_TOKEN"), # Make sure the HF_TOKEN is passed here as the api_key
-        temperature=0.7
-    )
-    
+    repo_id="microsoft/FastContext-1.0-4B-RL"
+
+    # model = init_chat_model(
+    #     model="microsoft/FastContext-1.0-4B-RL",
+    #     model_provider="huggingface",
+    #     base_url="https://router.huggingface.co/v1",
+    #     api_key=os.getenv("HF_TOKEN"), # Make sure the HF_TOKEN is passed here as the api_key
+    #     temperature=0.7
+    # )
+
+    llm = HuggingFaceEndpoint(repo_id="microsoft/FastContext-1.0-4B-RL", task="text-generation")
+    model = ChatHuggingFace(llm=llm)
+
+    # model = HuggingFaceEndpoint(
+    #     repo_id=repo_id,
+    #     task="text-generation",
+    #     max_new_tokens=512,
+    #     temperature=0.7,
+    #     do_sample=True
+    # )
     model = model.with_structured_output(Intent, method="json_mode")
 
     prompt = f"""\n\nUser's Request: {state["query"]}
