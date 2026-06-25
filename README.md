@@ -1,5 +1,3 @@
-# GEMINI.md
-
 # AI Application Compiler
 
 ## Overview
