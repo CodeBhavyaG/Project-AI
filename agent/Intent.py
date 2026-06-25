@@ -2,7 +2,7 @@ import os
 import dotenv
 
 from state import State, Intent
-from langchain.chat_models import init_chat_model
+#from langchain.chat_models import init_chat_model
 from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 
 dotenv.load_dotenv()  # Load environment variables from .env file
