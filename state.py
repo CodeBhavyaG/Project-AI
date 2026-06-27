@@ -1,51 +1,58 @@
 from typing import Annotated, Literal
 from typing_extensions import TypedDict
+from pydantic import BaseModel, Field
 from langgraph.graph.message import add_messages
 
 
-class Intent(TypedDict):
+class Intent(BaseModel):
     project_name : str
     features : list[str]
 
-class Design(TypedDict):
+class Design(BaseModel):
     pages : list[str]
     entities : list[str]
     endpoints : list[str]
 
-class entity(TypedDict):
+class entity(BaseModel):
     name : str
     components : list[str]
 
-class UI(TypedDict):
+class UI(BaseModel):
     ui_schema : list[entity]
 
-class endpoint(TypedDict):
+class endpoint(BaseModel):
     path : str
     method : Literal["/GET","/POST","/PUT","/PATCH","/DELETE"]
 
-class API(TypedDict):
+class API(BaseModel):
     endpoints : list[endpoint]
 
-class table(TypedDict):
-    attributes : list[str]
+class Attribute(BaseModel):
+    name: str = Field(description="Name of the column/attribute")
+    type: str = Field(description="SQL data type (e.g. VARCHAR, UUID)")
+    constraints: str = Field(description="Constraints like PRIMARY KEY, UNIQUE, NOT NULL", default="")
 
-class DB(TypedDict):
+class table(BaseModel):
+    name: str = Field(description="Name of the table")
+    attributes : list[Attribute]
+
+class DB(BaseModel):
     tables : list[table]
 
-class error(TypedDict):
+class error(BaseModel):
     type : str
     field : str
     message : str
 
-class Validation(TypedDict):
+class Validation(BaseModel):
     is_valid : bool
     errors : list[error]
 
 class State(TypedDict):
     query : Annotated[list,add_messages]
-    intent : Intent | None = None
-    design : Design | None = None
-    ui : UI | None = None
-    api : API | None = None
-    db : DB | None = None
-    validation : Validation | None = None
+    intent : Intent | None
+    design : Design | None
+    ui : UI | None
+    api : API | None
+    db : DB | None
+    validation : Validation | None

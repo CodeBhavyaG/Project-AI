@@ -5,16 +5,14 @@ import os
 import dotenv
 
 dotenv.load_dotenv()  # Load environment variables from .env file
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
-
 
 async def Design_Agent(state : State):
     model = ChatOpenAI(
-    model="meta-llama/Llama-3.3-70B-Instruct",
-    openai_api_base="https://router.huggingface.co/v1",
-    openai_api_key=os.getenv("HF_TOKEN"),
-    temperature=0.0
-)
+      model="meta-llama/Llama-3.3-70B-Instruct",
+      openai_api_base="https://router.huggingface.co/v1",
+      openai_api_key=os.getenv("HF_TOKEN"),
+      temperature=0.1
+    )
 
     model = model.with_structured_output(Design, method="json_mode")
 

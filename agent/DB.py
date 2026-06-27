@@ -1,18 +1,19 @@
 import os
 import dotenv
 from state import table ,DB ,State
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+from langchain_openai import ChatOpenAI
 
 dotenv.load_dotenv()  # Load environment variables from .env file
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
 async def DB_Agent(state : State):
-    repo_id ="microsoft/FastContext-1.0-4B-RL"
+    model = ChatOpenAI(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        openai_api_base="https://router.huggingface.co/v1",
+        openai_api_key=os.getenv("HF_TOKEN"),
+        temperature=0.1
+    )
 
-    llm = HuggingFaceEndpoint(repo_id=repo_id, task="text-generation",temperature=0.0)
-    model = ChatHuggingFace(llm=llm)
-
-    model = model.with_structured_output(DB)
+    model = model.with_structured_output(DB, method="json_mode")
 
     system_prompt="""
     You are a Database Architect Agent in an AI software compiler. Your job is to design the database schema for the application based on the architect's design.
@@ -21,19 +22,26 @@ async def DB_Agent(state : State):
     
     Architectural Rules:
     1. Generate a table for each entity in the design's entities list.
-    2. Because the schema format only allows a single attributes list for each table, you MUST format the attributes array as follows:
-       - The first element must declare the table's name using this format: "table: <table_name>" (snake_case).
-       - The subsequent elements must declare the columns and their constraints in format: "<column_name>: <data_type> [constraints]" (e.g. "id: UUID PRIMARY KEY").
+    2. Define a primary key for every table (e.g., UUID PRIMARY KEY).
+    3. Define appropriate foreign keys if relationships are implied between entities.
     
     Output Schema:
     Your output must exactly match this JSON structure:
     {
         "tables": [
             {
-            "attributes": [
-                "table: table_name",
-                "column_name_1: DATA_TYPE constraints",
-                "column_name_2: DATA_TYPE constraints"
+                "name": "user",
+                "attributes": [
+                    {
+                        "name": "id",
+                        "type": "UUID",
+                        "constraints": "PRIMARY KEY"
+                    },
+                    {
+                        "name": "email",
+                        "type": "VARCHAR(255)",
+                        "constraints": "UNIQUE NOT NULL"
+                    }
                 ]
             }
         ]
@@ -48,7 +56,7 @@ async def DB_Agent(state : State):
         }
     }
     """
-    prompt = f"The system users prompt is {state.get("query")} use this as a context and the input give to you is Input: {state.get("design")}"
+    prompt = f"The system users prompt is {state['query']} use this as a context and the input give to you is Input: {state.get('design')}"
 
     messages = [
         {"role" : "system", "content" :system_prompt},

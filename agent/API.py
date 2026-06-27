@@ -1,18 +1,19 @@
 import os
 import dotenv
 from state import API ,endpoint ,State
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+from langchain_openai import ChatOpenAI
 
 dotenv.load_dotenv()  # Load environment variables from .env file
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
 async def API_Agent(state : State):
-    repo_id ="microsoft/FastContext-1.0-4B-RL"
+    model = ChatOpenAI(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        openai_api_base="https://router.huggingface.co/v1",
+        openai_api_key=os.getenv("HF_TOKEN"),
+        temperature=0.1
+    )
 
-    llm = HuggingFaceEndpoint(repo_id=repo_id, task="text-generation",temperature=0.1)
-    model = ChatHuggingFace(llm=llm)
-
-    model = model.with_structured_output(API)
+    model = model.with_structured_output(API, method="json_mode")
 
     system_prompt="""
     You are an API Architect Agent in an AI software compiler. Your job is to design the API endpoints for the application based on the architect's design.
@@ -58,23 +59,8 @@ async def API_Agent(state : State):
         ]
     }
     """
-    prompt = f"""
-    Transform the following endpoint names into a complete API schema.
 
-    User Context: {state.get("query")}
-
-    Endpoints to transform:
-    {', '.join(state.get("design", {}).get("endpoints", []))}
-
-    Remember:
-    - CREATE/ADD → /POST
-    - READ/GET → /GET
-    - UPDATE/MODIFY → /PATCH or /PUT
-    - DELETE → /DELETE
-
-    Convert each endpoint name to a proper REST path and assign the correct HTTP method.
-    Output ONLY valid JSON with no additional text.
-    """
+    prompt = f"""\n    Transform the following endpoint names into a complete API schema.\n\n    User Context: {state["query"]}\n\n    Endpoints to transform:\n    {', '.join(state.get("design").endpoints) if state.get("design") else ''}\n\n    Remember:\n    - CREATE/ADD → /POST\n    - READ/GET → /GET\n    - UPDATE/MODIFY → /PATCH or /PUT\n    - DELETE → /DELETE\n\n    Convert each endpoint name to a proper REST path and assign the correct HTTP method.\n    Output ONLY valid JSON with no additional text.\n    """
 
     messages = [
         {"role" : "system", "content" :system_prompt},

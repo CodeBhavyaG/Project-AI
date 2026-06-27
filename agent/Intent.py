@@ -2,34 +2,19 @@ import os
 import dotenv
 
 from state import State, Intent
-#from langchain.chat_models import init_chat_model
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+from langchain_openai import ChatOpenAI
 
 dotenv.load_dotenv()  # Load environment variables from .env file
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
 async def Intent_Agent(state : State) :
 
-    repo_id="microsoft/FastContext-1.0-4B-RL"
+    model = ChatOpenAI(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        openai_api_base="https://router.huggingface.co/v1",
+        openai_api_key=os.getenv("HF_TOKEN"),
+        temperature=0.1
+    )
 
-    # model = init_chat_model(
-    #     model="microsoft/FastContext-1.0-4B-RL",
-    #     model_provider="huggingface",
-    #     base_url="https://router.huggingface.co/v1",
-    #     api_key=os.getenv("HF_TOKEN"), # Make sure the HF_TOKEN is passed here as the api_key
-    #     temperature=0.7
-    # )
-
-    llm = HuggingFaceEndpoint(repo_id=repo_id, task="text-generation",temperature=0.0)
-    model = ChatHuggingFace(llm=llm)
-
-    # model = HuggingFaceEndpoint(
-    #     repo_id=repo_id,
-    #     task="text-generation",
-    #     max_new_tokens=512,
-    #     temperature=0.7,
-    #     do_sample=True
-    # )
     model = model.with_structured_output(Intent, method="json_mode")
 
     prompt = f"""\n\nUser's Request: {state["query"]}

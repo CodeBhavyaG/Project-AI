@@ -1,18 +1,19 @@
 import os
 import dotenv
 from state import UI,entity,State
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+from langchain_openai import ChatOpenAI
 
 dotenv.load_dotenv()  # Load environment variables from .env file
-os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
 async def UI_Agent(state : State):
-    repo_id ="microsoft/FastContext-1.0-4B-RL"
+    model = ChatOpenAI(
+        model="meta-llama/Llama-3.3-70B-Instruct",
+        openai_api_base="https://router.huggingface.co/v1",
+        openai_api_key=os.getenv("HF_TOKEN"),
+        temperature=0.1
+    )
 
-    llm = HuggingFaceEndpoint(repo_id=repo_id, task="text-generation",temperature=0.0)
-    model = ChatHuggingFace(llm=llm)
-
-    model = model.with_structured_output(UI)
+    model = model.with_structured_output(UI, method="json_mode")
 
     system_prompt="""
     You are a UI Architect Agent in an AI software compiler. Your job is to design the user interface structure for the application based on the architect's design.
@@ -71,7 +72,7 @@ async def UI_Agent(state : State):
         ]
     }
     """
-    prompt = f"The system users prompt is {state.get("query")} use this as a context and the input give to you is Input: {state.get("design")}"
+    prompt = f"The system users prompt is {state['query']} use this as a context and the input give to you is Input: {state.get('design')}"
 
     messages = [
         {"role" : "system", "content" :system_prompt},

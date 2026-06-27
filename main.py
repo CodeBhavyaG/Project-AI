@@ -32,7 +32,7 @@ async def run_pipeline():
     graph.add_edge("Test Agent",END)
 
     graph = graph.compile()
-    await graph.ainvoke({"query": "Make a online python compiler"})
+    await graph.ainvoke({"query": "I want a website that is similer to pintrest but for games"})
 
 if __name__ == "__main__":
     # This is the standard entry point to run an async function
