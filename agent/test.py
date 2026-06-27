@@ -1,9 +1,8 @@
-import os 
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 from state import State
+import json
 
-def test_agent(state : State):
-    print("Test Agent - Design extracted:", state.get("design"))
+async def test_agent(state : State):
+    print(json.dumps(state.get("api"),indent=4))
+    print(json.dumps(state.get("ui"),indent=4))
+    print(json.dumps(state.get("db"),indent=4))
     return {}

@@ -1,4 +1,4 @@
-from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
+# from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 from langchain_openai import ChatOpenAI
 from state import State, Design
 import os
@@ -8,12 +8,12 @@ dotenv.load_dotenv()  # Load environment variables from .env file
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
 
-def Design_Agent(state : State):
+async def Design_Agent(state : State):
     model = ChatOpenAI(
     model="meta-llama/Llama-3.3-70B-Instruct",
     openai_api_base="https://router.huggingface.co/v1",
     openai_api_key=os.getenv("HF_TOKEN"),
-    temperature=0.2
+    temperature=0.0
 )
 
     model = model.with_structured_output(Design, method="json_mode")
@@ -68,6 +68,6 @@ def Design_Agent(state : State):
         {"role" : "ai", "content" : str(state.get("intent"))}
     ]
 
-    response = model.invoke(messages)
+    response = await model.ainvoke(messages)
 
     return {"design":response}

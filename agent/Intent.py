@@ -8,7 +8,7 @@ from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 dotenv.load_dotenv()  # Load environment variables from .env file
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = os.getenv("HF_TOKEN")
 
-def Intent_Agent(state : State) :
+async def Intent_Agent(state : State) :
 
     repo_id="microsoft/FastContext-1.0-4B-RL"
 
@@ -20,7 +20,7 @@ def Intent_Agent(state : State) :
     #     temperature=0.7
     # )
 
-    llm = HuggingFaceEndpoint(repo_id="microsoft/FastContext-1.0-4B-RL", task="text-generation")
+    llm = HuggingFaceEndpoint(repo_id=repo_id, task="text-generation",temperature=0.0)
     model = ChatHuggingFace(llm=llm)
 
     # model = HuggingFaceEndpoint(
@@ -78,7 +78,7 @@ def Intent_Agent(state : State) :
         {"role": "user", "content": prompt}
     ]
 
-    resoponce = model.invoke(messages)
+    resoponce = await model.ainvoke(messages)
     
     return {"intent":resoponce}
 
