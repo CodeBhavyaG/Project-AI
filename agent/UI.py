@@ -1,19 +1,20 @@
 import os
 import dotenv
 from state import UI,entity,State
-from langchain_openai import ChatOpenAI
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 dotenv.load_dotenv()  # Load environment variables from .env file
 
-async def UI_Agent(state : State):
-    model = ChatOpenAI(
-        model="meta-llama/Llama-3.3-70B-Instruct",
-        openai_api_base="https://router.huggingface.co/v1",
-        openai_api_key=os.getenv("HF_TOKEN"),
-        temperature=0.1
-    )
+model = ChatNVIDIA(
+    model="meta/llama-3.1-8b-instruct",
+    api_key=os.getenv("NVIDIA_API_KEY"),
+    temperature=0.1,
+    timeout=120
+)
 
-    model = model.with_structured_output(UI, method="json_mode")
+model = model.with_structured_output(UI)
+
+async def UI_Agent(state : State):
 
     system_prompt="""
     You are a UI Architect Agent in an AI software compiler. Your job is to design the user interface structure for the application based on the architect's design.
@@ -74,9 +75,12 @@ async def UI_Agent(state : State):
     """
     prompt = f"The system users prompt is {state['query']} use this as a context and the input give to you is Input: {state.get('design')}"
 
+    if state.get("validation") and not state["validation"].is_valid:
+        prompt += f"\n\nPREVIOUS VALIDATION ERRORS YOU MUST FIX:\n{state['validation'].model_dump()}"
+
     messages = [
         {"role" : "system", "content" :system_prompt},
-        {"role" : "ai", "content" : prompt}
+        {"role" : "user", "content" : prompt}
     ]
 
     response = await model.ainvoke(messages)

@@ -1,21 +1,21 @@
 # from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
-from langchain_openai import ChatOpenAI
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 from state import State, Design
 import os
 import dotenv
 
 dotenv.load_dotenv()  # Load environment variables from .env file
 
+model = ChatNVIDIA(
+    model="meta/llama-3.1-8b-instruct",
+    api_key=os.getenv("NVIDIA_API_KEY"),
+    temperature=0.1,
+    timeout=120
+)
+
+model = model.with_structured_output(Design)
+
 async def Design_Agent(state : State):
-    model = ChatOpenAI(
-      model="meta-llama/Llama-3.3-70B-Instruct",
-      openai_api_base="https://router.huggingface.co/v1",
-      openai_api_key=os.getenv("HF_TOKEN"),
-      temperature=0.1
-    )
-
-    model = model.with_structured_output(Design, method="json_mode")
-
     system_prompt = """
     You are a software architect agent. Your task is to convert high-level application features into a concrete application architecture design.
 
@@ -63,7 +63,7 @@ async def Design_Agent(state : State):
 
     messages = [
         {"role" : "system", "content" :system_prompt},
-        {"role" : "ai", "content" : str(state.get("intent"))}
+        {"role" : "user", "content" : str(state.get("intent"))}
     ]
 
     response = await model.ainvoke(messages)

@@ -2,20 +2,20 @@ import os
 import dotenv
 
 from state import State, Intent
-from langchain_openai import ChatOpenAI
+from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 dotenv.load_dotenv()  # Load environment variables from .env file
 
+model = ChatNVIDIA(
+    model="meta/llama-3.1-8b-instruct",
+    api_key=os.getenv("NVIDIA_API_KEY"),
+    temperature=0.1,
+    timeout=120
+)
+
+model = model.with_structured_output(Intent)
+
 async def Intent_Agent(state : State) :
-
-    model = ChatOpenAI(
-        model="meta-llama/Llama-3.3-70B-Instruct",
-        openai_api_base="https://router.huggingface.co/v1",
-        openai_api_key=os.getenv("HF_TOKEN"),
-        temperature=0.1
-    )
-
-    model = model.with_structured_output(Intent, method="json_mode")
 
     prompt = f"""\n\nUser's Request: {state["query"]}
     JSON Output:"""

@@ -48,6 +48,13 @@ class Validation(BaseModel):
     is_valid : bool
     errors : list[error]
 
+class GeneratedFile(BaseModel):
+    filepath: str = Field(description="Relative path of the file, e.g. 'server.js' or 'src/App.js'")
+    content: str = Field(description="The complete code content of the file")
+
+class Generation(BaseModel):
+    files: list[GeneratedFile]
+
 class State(TypedDict):
     query : Annotated[list,add_messages]
     intent : Intent | None
@@ -56,3 +63,4 @@ class State(TypedDict):
     api : API | None
     db : DB | None
     validation : Validation | None
+    generation : Generation | None
