@@ -61,5 +61,5 @@ async def run_pipeline_async(query: str):
 if __name__ == "__main__":
     # This is the standard entry point to run an async function
     query = "Make a complex online marketplace for selling digital art, including user profiles, shopping carts, reviews, and a payment processing endpoint."
-    query = "build a pintrest clone"
+    # query = "build a pintrest clone"
     asyncio.run(run_pipeline_async(query))

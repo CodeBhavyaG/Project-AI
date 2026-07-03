@@ -3,3 +3,4 @@
 __pycache__
 gemini.md
 .langgraph_api
+node_modules
